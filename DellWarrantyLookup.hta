@@ -1,0 +1,2407 @@
+<html>
+<head>
+<title>Dell Warranty Lookup Tool</title>
+<HTA:APPLICATION
+    ID="DellWarrantyTool"
+    APPLICATIONNAME="Dell Warranty Lookup Tool"
+    BORDER="thick"
+    BORDERSTYLE="normal"
+    CAPTION="yes"
+    ICON=""
+    MAXIMIZEBUTTON="yes"
+    MINIMIZEBUTTON="yes"
+    SHOWINTASKBAR="yes"
+    SINGLEINSTANCE="yes"
+    SYSMENU="yes"
+    VERSION="2.0"
+    WINDOWSTATE="normal"
+    SCROLL="no"
+    NAVIGABLE="yes"
+    CONTEXTMENU="no"
+    SELECTION="no"
+/>
+<meta http-equiv="X-UA-Compatible" content="IE=11" />
+<meta charset="utf-8" />
+<style>
+/* ============================================================
+   CSS VARIABLES & THEME SYSTEM
+   ============================================================ */
+:root {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8eaed;
+    --bg-input: #ffffff;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #8888a0;
+    --border-color: #d0d4dc;
+    --border-focus: #0072c6;
+    --accent: #0072c6;
+    --accent-hover: #005a9e;
+    --accent-light: rgba(0,114,198,0.08);
+    --success: #28a745;
+    --success-bg: rgba(40,167,69,0.1);
+    --danger: #dc3545;
+    --danger-bg: rgba(220,53,69,0.1);
+    --warning: #f0ad4e;
+    --warning-bg: rgba(240,173,78,0.1);
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+    --radius: 8px;
+    --radius-sm: 4px;
+    --transition: 0.2s ease;
+    --table-stripe: rgba(0,0,0,0.02);
+    --table-hover: rgba(0,114,198,0.06);
+    --scrollbar-bg: #e8eaed;
+    --scrollbar-thumb: #b0b4bc;
+}
+
+body.dark-mode {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --bg-input: #0d1117;
+    --text-primary: #e6edf3;
+    --text-secondary: #b1bac4;
+    --text-muted: #6e7681;
+    --border-color: #30363d;
+    --border-focus: #58a6ff;
+    --accent: #58a6ff;
+    --accent-hover: #79b8ff;
+    --accent-light: rgba(88,166,255,0.1);
+    --success: #3fb950;
+    --success-bg: rgba(63,185,80,0.15);
+    --danger: #f85149;
+    --danger-bg: rgba(248,81,73,0.15);
+    --warning: #d29922;
+    --warning-bg: rgba(210,153,34,0.15);
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 4px 20px rgba(0,0,0,0.4);
+    --table-stripe: rgba(255,255,255,0.02);
+    --table-hover: rgba(88,166,255,0.08);
+    --scrollbar-bg: #21262d;
+    --scrollbar-thumb: #484f58;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    transition: background var(--transition), color var(--transition);
+}
+
+/* ============================================================
+   SCROLLBAR STYLING
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+    background: linear-gradient(135deg, #0072c6 0%, #005a9e 100%);
+    color: #ffffff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+body.dark-mode .header {
+    background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.header-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+body.dark-mode .header-icon {
+    background: rgba(88,166,255,0.2);
+}
+
+.header-title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+.header-subtitle {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+.theme-toggle {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+body.dark-mode .theme-toggle {
+    background: rgba(88,166,255,0.15);
+    border-color: rgba(88,166,255,0.3);
+}
+
+/* ============================================================
+   MAIN CONTENT AREA
+   ============================================================ */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+/* ============================================================
+   CARDS / SECTIONS
+   ============================================================ */
+.card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-title .icon {
+    font-size: 16px;
+    opacity: 0.7;
+}
+
+.card-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.badge-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.badge-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+/* ============================================================
+   GRID LAYOUTS
+   ============================================================ */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input {
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(0,114,198,0.12);
+}
+
+body.dark-mode .form-input:focus {
+    box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--border-color);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #ffffff;
+    border-color: var(--success);
+}
+
+.btn-success:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #ffffff;
+    border-color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   AUTH ROW (inline layout)
+   ============================================================ */
+.auth-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.auth-row .form-group {
+    flex: 1;
+}
+
+/* ============================================================
+   SINGLE LOOKUP ROW
+   ============================================================ */
+.lookup-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.lookup-row .form-group {
+    flex: 1;
+    max-width: 320px;
+}
+
+/* ============================================================
+   BULK IMPORT
+   ============================================================ */
+.import-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tags-preview {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--text-secondary);
+    max-height: 80px;
+    overflow-y: auto;
+    display: none;
+    border: 1px solid var(--border-color);
+}
+
+.tags-preview .tag-chip {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin: 2px 3px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-section {
+    display: none;
+    margin-top: 12px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #00a0e9);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.progress-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.progress-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dot-total { background: var(--accent); }
+.dot-done { background: var(--success); }
+.dot-fail { background: var(--danger); }
+.dot-left { background: var(--text-muted); }
+
+/* ============================================================
+   SEARCH / FILTER BAR
+   ============================================================ */
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 7px 12px 7px 32px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+}
+
+.search-box input:focus {
+    border-color: var(--border-focus);
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.result-count {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   RESULTS TABLE
+   ============================================================ */
+.table-wrapper {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 400px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+thead th {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: background var(--transition);
+}
+
+thead th:hover {
+    background: var(--table-hover);
+    color: var(--accent);
+}
+
+thead th .sort-arrow {
+    margin-left: 4px;
+    opacity: 0.4;
+    font-size: 10px;
+}
+
+thead th.sorted .sort-arrow {
+    opacity: 1;
+    color: var(--accent);
+}
+
+tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition);
+}
+
+tbody tr:nth-child(even) {
+    background: var(--table-stripe);
+}
+
+tbody tr:hover {
+    background: var(--table-hover);
+}
+
+tbody tr.selected {
+    background: var(--accent-light);
+}
+
+tbody td {
+    padding: 9px 14px;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.status-active {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.status-expired {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.status-error {
+    color: var(--warning);
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.empty-state .sub {
+    font-size: 12px;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.footer-left {
+    display: flex;
+    gap: 8px;
+}
+
+.footer-right {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   CONTEXT MENU
+   ============================================================ */
+.context-menu {
+    position: fixed;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    display: none;
+    min-width: 180px;
+    padding: 4px 0;
+}
+
+.context-menu-item {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.context-menu-item:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+.context-menu-sep {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 0;
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    padding: 12px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s ease;
+    max-width: 380px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toast-info {
+    background: var(--accent);
+    color: #fff;
+}
+
+.toast-success {
+    background: var(--success);
+    color: #fff;
+}
+
+.toast-error {
+    background: var(--danger);
+    color: #fff;
+}
+
+.toast-warning {
+    background: var(--warning);
+    color: #1a1a2e;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ============================================================
+   MODAL OVERLAY (for credential save prompt)
+   ============================================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-box h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.modal-box p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* ============================================================
+   RESPONSIVE & PRINT
+   ============================================================ */
+@media print {
+    .header, .footer, .card:not(#resultsCard) { display: none !important; }
+    .main-content { overflow: visible !important; }
+    .table-wrapper { max-height: none !important; overflow: visible !important; }
+}
+</style>
+
+<script language="javascript">
+/* ============================================================
+   DELL WARRANTY LOOKUP TOOL - MAIN APPLICATION LOGIC
+   ============================================================
+   A standalone HTA application for IT administrators to look up
+   Dell device warranty information via the Dell TechDirect API.
+   ============================================================ */
+
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+var appState = {
+    accessToken: "",
+    tokenExpiry: 0,
+    clientId: "",
+    clientSecret: "",
+    results: [],
+    importedTags: [],
+    isProcessing: false,
+    cancelRequested: false,
+    sortColumn: -1,
+    sortAscending: true,
+    selectedRows: [],
+    darkMode: false
+};
+
+// Dell API endpoints
+var DELL_AUTH_URL = "https://apigtwb2c.us.dell.com/auth/oauth/v2/token";
+var DELL_WARRANTY_URL = "https://apigtwb2c.us.dell.com/PROD/sbil/eapi/v5/asset-entitlements";
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+
+/**
+ * Initialize the application on load.
+ * Loads saved credentials and theme preference.
+ */
+function initApp() {
+    loadSavedCredentials();
+    loadThemePreference();
+    updateResultsTable();
+    resizeApp();
+}
+
+/**
+ * Resize window to a comfortable default size.
+ */
+function resizeApp() {
+    try {
+        window.resizeTo(1280, 850);
+        var screenW = screen.availWidth;
+        var screenH = screen.availHeight;
+        var left = Math.floor((screenW - 1280) / 2);
+        var top = Math.floor((screenH - 850) / 2);
+        if (left < 0) left = 0;
+        if (top < 0) top = 0;
+        window.moveTo(left, top);
+    } catch(e) {}
+}
+
+// ============================================================
+// THEME MANAGEMENT
+// ============================================================
+
+/**
+ * Toggle between dark mode and light mode.
+ */
+function toggleTheme() {
+    appState.darkMode = !appState.darkMode;
+    if (appState.darkMode) {
+        document.body.className = "dark-mode";
+    } else {
+        document.body.className = "";
+    }
+    var btn = document.getElementById("themeBtn");
+    btn.innerHTML = appState.darkMode ? "&#9788; Light Mode" : "&#9790; Dark Mode";
+    saveThemePreference();
+}
+
+/**
+ * Save the current theme preference to a local file.
+ */
+function saveThemePreference() {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var appDataPath = getAppDataPath();
+        if (!fso.FolderExists(appDataPath)) {
+            fso.CreateFolder(appDataPath);
+        }
+        var f = fso.CreateTextFile(appDataPath + "\\theme.dat", true);
+        f.Write(appState.darkMode ? "dark" : "light");
+        f.Close();
+    } catch(e) {}
+}
+
+/**
+ * Load the saved theme preference.
+ */
+function loadThemePreference() {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var filePath = getAppDataPath() + "\\theme.dat";
+        if (fso.FileExists(filePath)) {
+            var f = fso.OpenTextFile(filePath, 1);
+            var theme = f.ReadAll();
+            f.Close();
+            if (theme === "dark") {
+                appState.darkMode = true;
+                document.body.className = "dark-mode";
+                var btn = document.getElementById("themeBtn");
+                btn.innerHTML = "&#9788; Light Mode";
+            }
+        }
+    } catch(e) {}
+}
+
+// ============================================================
+// CREDENTIAL MANAGEMENT
+// ============================================================
+
+/**
+ * Get the application data folder path for saving preferences.
+ */
+function getAppDataPath() {
+    var shell = new ActiveXObject("WScript.Shell");
+    var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
+    return appData + "\\DellWarrantyTool";
+}
+
+/**
+ * Save API credentials to a local file (base64 encoded for minimal obfuscation).
+ */
+function saveCredentials() {
+    var clientId = document.getElementById("clientId").value.replace(/^\s+|\s+$/g, "");
+    var clientSecret = document.getElementById("clientSecret").value.replace(/^\s+|\s+$/g, "");
+    if (!clientId || !clientSecret) {
+        showToast("Enter both Client ID and Client Secret before saving.", "warning");
+        return;
+    }
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var appDataPath = getAppDataPath();
+        if (!fso.FolderExists(appDataPath)) {
+            fso.CreateFolder(appDataPath);
+        }
+        var data = btoa(clientId + "|" + clientSecret);
+        var f = fso.CreateTextFile(appDataPath + "\\creds.dat", true);
+        f.Write(data);
+        f.Close();
+        showToast("Credentials saved locally.", "success");
+    } catch(e) {
+        showToast("Failed to save credentials: " + e.message, "error");
+    }
+}
+
+/**
+ * Load saved credentials on startup.
+ */
+function loadSavedCredentials() {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var filePath = getAppDataPath() + "\\creds.dat";
+        if (fso.FileExists(filePath)) {
+            var f = fso.OpenTextFile(filePath, 1);
+            var data = f.ReadAll();
+            f.Close();
+            var decoded = atob(data);
+            var parts = decoded.split("|");
+            if (parts.length >= 2) {
+                document.getElementById("clientId").value = parts[0];
+                document.getElementById("clientSecret").value = parts.slice(1).join("|");
+            }
+        }
+    } catch(e) {}
+}
+
+/**
+ * Clear saved credentials from disk.
+ */
+function clearSavedCredentials() {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var filePath = getAppDataPath() + "\\creds.dat";
+        if (fso.FileExists(filePath)) {
+            fso.DeleteFile(filePath);
+        }
+        document.getElementById("clientId").value = "";
+        document.getElementById("clientSecret").value = "";
+        appState.accessToken = "";
+        appState.tokenExpiry = 0;
+        updateAuthStatus(false);
+        showToast("Credentials cleared.", "info");
+    } catch(e) {
+        showToast("Failed to clear credentials: " + e.message, "error");
+    }
+}
+
+// ============================================================
+// BASE64 HELPERS (for IE/HTA compatibility)
+// ============================================================
+var _b64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+function btoa(input) {
+    var output = "";
+    var i = 0;
+    while (i < input.length) {
+        var c1 = input.charCodeAt(i++);
+        var c2 = i < input.length ? input.charCodeAt(i++) : NaN;
+        var c3 = i < input.length ? input.charCodeAt(i++) : NaN;
+        var e1 = c1 >> 2;
+        var e2 = ((c1 & 3) << 4) | (isNaN(c2) ? 0 : (c2 >> 4));
+        var e3 = isNaN(c2) ? 64 : ((c2 & 15) << 2) | (isNaN(c3) ? 0 : (c3 >> 6));
+        var e4 = isNaN(c3) ? 64 : (c3 & 63);
+        output += _b64chars.charAt(e1) + _b64chars.charAt(e2) + _b64chars.charAt(e3) + _b64chars.charAt(e4);
+    }
+    return output;
+}
+
+function atob(input) {
+    var output = "";
+    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+    var i = 0;
+    while (i < input.length) {
+        var e1 = _b64chars.indexOf(input.charAt(i++));
+        var e2 = _b64chars.indexOf(input.charAt(i++));
+        var e3 = _b64chars.indexOf(input.charAt(i++));
+        var e4 = _b64chars.indexOf(input.charAt(i++));
+        var c1 = (e1 << 2) | (e2 >> 4);
+        output += String.fromCharCode(c1);
+        if (e3 !== 64) {
+            var c2 = ((e2 & 15) << 4) | (e3 >> 2);
+            output += String.fromCharCode(c2);
+        }
+        if (e4 !== 64) {
+            var c3 = ((e3 & 3) << 6) | e4;
+            output += String.fromCharCode(c3);
+        }
+    }
+    return output;
+}
+
+// ============================================================
+// DELL API - OAUTH TOKEN MANAGEMENT
+// ============================================================
+
+/**
+ * Authenticate with Dell's OAuth endpoint and retrieve an access token.
+ * Caches the token until it expires.
+ * @param {Function} callback - Called with (error, token)
+ */
+function authenticate(callback) {
+    // Check if we have a valid cached token
+    var now = new Date().getTime();
+    if (appState.accessToken && now < appState.tokenExpiry) {
+        callback(null, appState.accessToken);
+        return;
+    }
+
+    var clientId = document.getElementById("clientId").value.replace(/^\s+|\s+$/g, "");
+    var clientSecret = document.getElementById("clientSecret").value.replace(/^\s+|\s+$/g, "");
+
+    if (!clientId || !clientSecret) {
+        callback("Please enter your Dell API Client ID and Client Secret.", null);
+        return;
+    }
+
+    appState.clientId = clientId;
+    appState.clientSecret = clientSecret;
+
+    try {
+        var xhr = new ActiveXObject("MSXML2.XMLHTTP.6.0");
+        var body = "client_id=" + encodeURIComponent(clientId) +
+                   "&client_secret=" + encodeURIComponent(clientSecret) +
+                   "&grant_type=client_credentials";
+
+        xhr.open("POST", DELL_AUTH_URL, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var response = parseJSON(xhr.responseText);
+                        appState.accessToken = response.access_token;
+                        // Set expiry slightly before actual expiry (30 seconds buffer)
+                        var expiresIn = (response.expires_in || 3600) - 30;
+                        appState.tokenExpiry = new Date().getTime() + (expiresIn * 1000);
+                        updateAuthStatus(true);
+                        callback(null, appState.accessToken);
+                    } catch(parseErr) {
+                        callback("Failed to parse authentication response.", null);
+                    }
+                } else if (xhr.status === 401) {
+                    callback("Authentication failed. Check your Client ID and Secret.", null);
+                    updateAuthStatus(false);
+                } else {
+                    callback("Authentication error (HTTP " + xhr.status + "). Please try again.", null);
+                    updateAuthStatus(false);
+                }
+            }
+        };
+
+        xhr.send(body);
+    } catch(e) {
+        callback("Network error during authentication: " + e.message, null);
+    }
+}
+
+/**
+ * Update the auth status badge in the UI.
+ */
+function updateAuthStatus(authenticated) {
+    var badge = document.getElementById("authBadge");
+    if (authenticated) {
+        badge.className = "card-badge badge-success";
+        badge.innerHTML = "&#10003; Authenticated";
+    } else {
+        badge.className = "card-badge badge-danger";
+        badge.innerHTML = "&#10007; Not Authenticated";
+    }
+}
+
+/**
+ * Test authentication without performing a lookup.
+ */
+function testAuth() {
+    showToast("Testing authentication...", "info");
+    authenticate(function(err, token) {
+        if (err) {
+            showToast(err, "error");
+        } else {
+            showToast("Authentication successful! Token acquired.", "success");
+        }
+    });
+}
+
+// ============================================================
+// DELL API - WARRANTY LOOKUP
+// ============================================================
+
+/**
+ * Look up warranty information for a single service tag.
+ * @param {string} serviceTag - The Dell service tag
+ * @param {Function} callback - Called with (error, resultObject)
+ */
+function lookupWarranty(serviceTag, callback) {
+    authenticate(function(authErr, token) {
+        if (authErr) {
+            callback(authErr, null);
+            return;
+        }
+
+        try {
+            var xhr = new ActiveXObject("MSXML2.XMLHTTP.6.0");
+            var url = DELL_WARRANTY_URL + "?servicetags=" + encodeURIComponent(serviceTag);
+
+            xhr.open("GET", url, true);
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
+            xhr.setRequestHeader("Accept", "application/json");
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = parseJSON(xhr.responseText);
+                            var result = parseWarrantyResponse(serviceTag, data);
+                            callback(null, result);
+                        } catch(parseErr) {
+                            callback(null, createErrorResult(serviceTag, "Failed to parse API response"));
+                        }
+                    } else if (xhr.status === 401) {
+                        // Token may have expired, clear and retry once
+                        appState.accessToken = "";
+                        appState.tokenExpiry = 0;
+                        authenticate(function(retryErr, newToken) {
+                            if (retryErr) {
+                                callback(null, createErrorResult(serviceTag, "Authentication failed on retry"));
+                                return;
+                            }
+                            retryLookup(serviceTag, newToken, callback);
+                        });
+                    } else if (xhr.status === 429) {
+                        callback("RATE_LIMITED", null);
+                    } else if (xhr.status === 404) {
+                        callback(null, createErrorResult(serviceTag, "Service tag not found"));
+                    } else {
+                        callback(null, createErrorResult(serviceTag, "API error (HTTP " + xhr.status + ")"));
+                    }
+                }
+            };
+
+            xhr.send();
+        } catch(e) {
+            callback(null, createErrorResult(serviceTag, "Network error: " + e.message));
+        }
+    });
+}
+
+/**
+ * Retry a warranty lookup with a fresh token.
+ */
+function retryLookup(serviceTag, token, callback) {
+    try {
+        var xhr = new ActiveXObject("MSXML2.XMLHTTP.6.0");
+        var url = DELL_WARRANTY_URL + "?servicetags=" + encodeURIComponent(serviceTag);
+
+        xhr.open("GET", url, true);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+        xhr.setRequestHeader("Accept", "application/json");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var data = parseJSON(xhr.responseText);
+                        var result = parseWarrantyResponse(serviceTag, data);
+                        callback(null, result);
+                    } catch(e) {
+                        callback(null, createErrorResult(serviceTag, "Parse error on retry"));
+                    }
+                } else {
+                    callback(null, createErrorResult(serviceTag, "API error on retry (HTTP " + xhr.status + ")"));
+                }
+            }
+        };
+
+        xhr.send();
+    } catch(e) {
+        callback(null, createErrorResult(serviceTag, "Network error on retry"));
+    }
+}
+
+/**
+ * Parse the Dell API warranty response into our standard result object.
+ */
+function parseWarrantyResponse(serviceTag, data) {
+    var result = {
+        serviceTag: serviceTag,
+        model: "",
+        shipDate: "",
+        warrantyStart: "",
+        warrantyEnd: "",
+        status: "",
+        supportLevel: "",
+        error: ""
+    };
+
+    try {
+        var entries = null;
+
+        // Handle different response structures
+        if (data && data.length && data.length > 0) {
+            entries = data[0];
+        } else if (data && data.entitlements) {
+            entries = data;
+        } else if (data && typeof data === "object") {
+            entries = data;
+        }
+
+        if (!entries) {
+            result.error = "No data returned";
+            result.status = "Error";
+            return result;
+        }
+
+        // Extract product info
+        result.model = entries.productLineDescription || entries.productLine || entries.systemDescription || "";
+        result.shipDate = formatDate(entries.shipDate || "");
+
+        // Process entitlements to find warranty dates
+        var entitlements = entries.entitlements || [];
+        var latestEnd = null;
+        var earliestStart = null;
+        var supportLevel = "";
+
+        for (var i = 0; i < entitlements.length; i++) {
+            var ent = entitlements[i];
+            var startStr = ent.startDate || "";
+            var endStr = ent.endDate || "";
+            var sLevel = ent.serviceLevelDescription || ent.serviceLevelGroup || "";
+
+            if (startStr) {
+                var startDate = new Date(startStr);
+                if (!earliestStart || startDate < earliestStart) {
+                    earliestStart = startDate;
+                }
+            }
+
+            if (endStr) {
+                var endDate = new Date(endStr);
+                if (!latestEnd || endDate > latestEnd) {
+                    latestEnd = endDate;
+                    supportLevel = sLevel;
+                }
+            }
+        }
+
+        if (earliestStart) {
+            result.warrantyStart = formatDateObj(earliestStart);
+        }
+
+        if (latestEnd) {
+            result.warrantyEnd = formatDateObj(latestEnd);
+            var now = new Date();
+            result.status = (latestEnd >= now) ? "Active" : "Expired";
+        } else {
+            result.status = "Unknown";
+        }
+
+        result.supportLevel = supportLevel;
+
+    } catch(e) {
+        result.error = "Parse error: " + e.message;
+        result.status = "Error";
+    }
+
+    return result;
+}
+
+/**
+ * Create a result object for a failed lookup.
+ */
+function createErrorResult(serviceTag, errorMsg) {
+    return {
+        serviceTag: serviceTag,
+        model: "",
+        shipDate: "",
+        warrantyStart: "",
+        warrantyEnd: "",
+        status: "Error",
+        supportLevel: "",
+        error: errorMsg
+    };
+}
+
+// ============================================================
+// SINGLE TAG LOOKUP
+// ============================================================
+
+/**
+ * Perform a single service tag lookup from the input field.
+ */
+function singleLookup() {
+    var input = document.getElementById("singleTag");
+    var tag = input.value.replace(/^\s+|\s+$/g, "").toUpperCase();
+
+    if (!tag) {
+        showToast("Please enter a service tag.", "warning");
+        input.focus();
+        return;
+    }
+
+    if (!isValidServiceTag(tag)) {
+        showToast("Invalid service tag format. Tags are typically 5-7 alphanumeric characters.", "warning");
+        return;
+    }
+
+    var btn = document.getElementById("lookupBtn");
+    btn.disabled = true;
+    btn.innerHTML = "Looking up...";
+
+    lookupWarranty(tag, function(err, result) {
+        btn.disabled = false;
+        btn.innerHTML = "&#128269; Lookup";
+
+        if (err) {
+            showToast(err, "error");
+            return;
+        }
+
+        // Add or update result
+        addOrUpdateResult(result);
+        updateResultsTable();
+
+        if (result.error) {
+            showToast("Lookup completed with error: " + result.error, "warning");
+        } else {
+            showToast("Warranty info retrieved for " + tag, "success");
+        }
+    });
+}
+
+// ============================================================
+// FILE IMPORT
+// ============================================================
+
+/**
+ * Open a file dialog and import service tags from CSV or TXT.
+ */
+function importFile() {
+    try {
+        var dialog = new ActiveXObject("MSComDlg.CommonDialog");
+        dialog.Filter = "Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
+        dialog.FilterIndex = 1;
+        dialog.MaxFileSize = 32767;
+        dialog.ShowOpen();
+
+        var filePath = dialog.FileName;
+        if (!filePath) return;
+
+        readImportFile(filePath);
+    } catch(e) {
+        // Fallback: use HTA input file dialog via a hidden input or manual path entry
+        importFileViaInput();
+    }
+}
+
+/**
+ * Fallback import method using an input element for HTA environments
+ * where MSComDlg is unavailable.
+ */
+function importFileViaInput() {
+    var fileInput = document.getElementById("fileInput");
+    fileInput.click();
+}
+
+/**
+ * Handle file selection from the hidden file input element.
+ */
+function handleFileSelect() {
+    var fileInput = document.getElementById("fileInput");
+    var filePath = fileInput.value;
+    if (!filePath) return;
+    readImportFile(filePath);
+    fileInput.value = "";
+}
+
+/**
+ * Read and parse an imported file.
+ */
+function readImportFile(filePath) {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        if (!fso.FileExists(filePath)) {
+            showToast("File not found: " + filePath, "error");
+            return;
+        }
+
+        var file = fso.OpenTextFile(filePath, 1);
+        var content = file.ReadAll();
+        file.Close();
+
+        var tags = parseServiceTags(content);
+
+        if (tags.length === 0) {
+            showToast("No valid service tags found in the file.", "warning");
+            return;
+        }
+
+        appState.importedTags = tags;
+        displayImportedTags(tags);
+        showToast(tags.length + " unique service tag(s) imported.", "success");
+
+        // Enable the start button
+        document.getElementById("startBatchBtn").disabled = false;
+
+    } catch(e) {
+        showToast("Error reading file: " + e.message, "error");
+    }
+}
+
+/**
+ * Parse service tags from raw file content.
+ * Handles CSV (with header) and TXT (one per line) formats.
+ * Removes duplicates, blank lines, and validates tags.
+ */
+function parseServiceTags(content) {
+    var lines = content.split(/[\r\n]+/);
+    var tags = [];
+    var seen = {};
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].replace(/^\s+|\s+$/g, "");
+
+        // Skip empty lines
+        if (!line) continue;
+
+        // Handle CSV: split by comma and process each field
+        var fields = line.split(",");
+
+        for (var j = 0; j < fields.length; j++) {
+            var tag = fields[j].replace(/^\s+|\s+$/g, "").replace(/"/g, "").toUpperCase();
+
+            // Skip header-like values
+            if (tag === "SERVICETAG" || tag === "SERVICE TAG" || tag === "SERVICE_TAG" ||
+                tag === "TAG" || tag === "SERIAL" || tag === "SERIAL NUMBER" ||
+                tag === "SERIALNUMBER") continue;
+
+            // Skip empty
+            if (!tag) continue;
+
+            // Validate and deduplicate
+            if (isValidServiceTag(tag) && !seen[tag]) {
+                seen[tag] = true;
+                tags.push(tag);
+            }
+        }
+    }
+
+    return tags;
+}
+
+/**
+ * Validate a service tag format.
+ * Dell service tags are typically 5-7 alphanumeric characters.
+ */
+function isValidServiceTag(tag) {
+    return /^[A-Za-z0-9]{4,15}$/.test(tag);
+}
+
+/**
+ * Display imported tags as chips in the preview area.
+ */
+function displayImportedTags(tags) {
+    var preview = document.getElementById("tagsPreview");
+    var html = "<strong>" + tags.length + " tags ready for processing:</strong><br>";
+    for (var i = 0; i < tags.length; i++) {
+        html += '<span class="tag-chip">' + escapeHtml(tags[i]) + '</span>';
+    }
+    preview.innerHTML = html;
+    preview.style.display = "block";
+}
+
+// ============================================================
+// BATCH PROCESSING
+// ============================================================
+
+/**
+ * Start batch processing of imported service tags.
+ */
+function startBatch() {
+    if (appState.importedTags.length === 0) {
+        showToast("No tags to process. Import a file first.", "warning");
+        return;
+    }
+
+    appState.isProcessing = true;
+    appState.cancelRequested = false;
+
+    // Update UI
+    document.getElementById("startBatchBtn").disabled = true;
+    document.getElementById("cancelBatchBtn").disabled = false;
+    document.getElementById("importBtn").disabled = true;
+
+    var progressSection = document.getElementById("progressSection");
+    progressSection.style.display = "block";
+
+    var total = appState.importedTags.length;
+    var completed = 0;
+    var failed = 0;
+    var index = 0;
+
+    updateProgress(0, total, 0, 0);
+
+    /**
+     * Process the next tag in the queue using setTimeout for non-blocking.
+     */
+    function processNext() {
+        // Check for cancel
+        if (appState.cancelRequested) {
+            finishBatch("Processing cancelled. " + completed + " of " + total + " completed.");
+            return;
+        }
+
+        // Check if done
+        if (index >= total) {
+            finishBatch("Batch complete! " + completed + " succeeded, " + failed + " failed.");
+            return;
+        }
+
+        var tag = appState.importedTags[index];
+        index++;
+
+        lookupWarranty(tag, function(err, result) {
+            if (err === "RATE_LIMITED") {
+                // Wait and retry this tag
+                index--;
+                showToast("Rate limited by Dell API. Waiting 5 seconds...", "warning");
+                setTimeout(processNext, 5000);
+                return;
+            }
+
+            if (result) {
+                addOrUpdateResult(result);
+                if (result.error) {
+                    failed++;
+                } else {
+                    completed++;
+                }
+            } else {
+                failed++;
+                addOrUpdateResult(createErrorResult(tag, err || "Unknown error"));
+            }
+
+            updateProgress(index, total, completed, failed);
+            updateResultsTable();
+
+            // Small delay between requests to avoid rate limiting (300ms)
+            setTimeout(processNext, 300);
+        });
+    }
+
+    // Start processing
+    processNext();
+}
+
+/**
+ * Cancel an in-progress batch operation.
+ */
+function cancelBatch() {
+    if (appState.isProcessing) {
+        appState.cancelRequested = true;
+        showToast("Cancelling... will stop after current lookup.", "info");
+    }
+}
+
+/**
+ * Clean up after batch processing completes or is cancelled.
+ */
+function finishBatch(message) {
+    appState.isProcessing = false;
+    appState.cancelRequested = false;
+
+    document.getElementById("startBatchBtn").disabled = false;
+    document.getElementById("cancelBatchBtn").disabled = true;
+    document.getElementById("importBtn").disabled = false;
+
+    showToast(message, "info");
+}
+
+/**
+ * Update the progress bar and stats display.
+ */
+function updateProgress(current, total, completed, failed) {
+    var pct = total > 0 ? Math.round((current / total) * 100) : 0;
+    var remaining = total - current;
+
+    document.getElementById("progressFill").style.width = pct + "%";
+    document.getElementById("statTotal").innerHTML = total;
+    document.getElementById("statCompleted").innerHTML = completed;
+    document.getElementById("statFailed").innerHTML = failed;
+    document.getElementById("statRemaining").innerHTML = remaining;
+}
+
+// ============================================================
+// RESULTS MANAGEMENT
+// ============================================================
+
+/**
+ * Add a result to the results array, or update if the tag already exists.
+ */
+function addOrUpdateResult(result) {
+    for (var i = 0; i < appState.results.length; i++) {
+        if (appState.results[i].serviceTag === result.serviceTag) {
+            appState.results[i] = result;
+            return;
+        }
+    }
+    appState.results.push(result);
+}
+
+/**
+ * Clear all results.
+ */
+function clearResults() {
+    appState.results = [];
+    appState.selectedRows = [];
+    appState.importedTags = [];
+    document.getElementById("tagsPreview").style.display = "none";
+    document.getElementById("progressSection").style.display = "none";
+    document.getElementById("startBatchBtn").disabled = true;
+    updateResultsTable();
+    showToast("Results cleared.", "info");
+}
+
+/**
+ * Render the results table based on current data, filters, and sort.
+ */
+function updateResultsTable() {
+    var tbody = document.getElementById("resultsBody");
+    var searchVal = document.getElementById("searchInput").value.replace(/^\s+|\s+$/g, "").toUpperCase();
+    var filtered = [];
+
+    // Filter results
+    for (var i = 0; i < appState.results.length; i++) {
+        var r = appState.results[i];
+        if (searchVal) {
+            var match = false;
+            if (r.serviceTag.toUpperCase().indexOf(searchVal) >= 0) match = true;
+            if (r.model.toUpperCase().indexOf(searchVal) >= 0) match = true;
+            if (r.status.toUpperCase().indexOf(searchVal) >= 0) match = true;
+            if (r.supportLevel.toUpperCase().indexOf(searchVal) >= 0) match = true;
+            if (r.error.toUpperCase().indexOf(searchVal) >= 0) match = true;
+            if (!match) continue;
+        }
+        filtered.push(r);
+    }
+
+    // Sort results
+    if (appState.sortColumn >= 0) {
+        var col = appState.sortColumn;
+        var asc = appState.sortAscending;
+        filtered.sort(function(a, b) {
+            var valA = getColumnValue(a, col);
+            var valB = getColumnValue(b, col);
+            if (valA < valB) return asc ? -1 : 1;
+            if (valA > valB) return asc ? 1 : -1;
+            return 0;
+        });
+    }
+
+    // Update count
+    document.getElementById("resultCount").innerHTML = filtered.length + " of " + appState.results.length + " result(s)";
+
+    // Build table body
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">' +
+            '<div class="empty-icon">&#128196;</div>' +
+            '<p>No results to display</p>' +
+            '<div class="sub">Enter a service tag or import a file to get started</div>' +
+            '</td></tr>';
+        return;
+    }
+
+    var html = "";
+    for (var i = 0; i < filtered.length; i++) {
+        var r = filtered[i];
+        var isSelected = appState.selectedRows.indexOf(r.serviceTag) >= 0;
+        var statusClass = "";
+        var statusText = r.status;
+
+        if (r.error) {
+            statusClass = "status-error";
+            statusText = r.error;
+        } else if (r.status === "Active") {
+            statusClass = "status-active";
+            statusText = "✓ Active";
+        } else if (r.status === "Expired") {
+            statusClass = "status-expired";
+            statusText = "✗ Expired";
+        }
+
+        html += '<tr' + (isSelected ? ' class="selected"' : '') +
+                ' onclick="toggleRowSelect(\'' + escapeHtml(r.serviceTag) + '\', event)"' +
+                ' oncontextmenu="showContextMenu(event, \'' + escapeHtml(r.serviceTag) + '\'); return false;">' +
+                '<td style="font-weight:600; font-family:Consolas,monospace;">' + escapeHtml(r.serviceTag) + '</td>' +
+                '<td>' + escapeHtml(r.model || "-") + '</td>' +
+                '<td>' + escapeHtml(r.shipDate || "-") + '</td>' +
+                '<td>' + escapeHtml(r.warrantyStart || "-") + '</td>' +
+                '<td>' + escapeHtml(r.warrantyEnd || "-") + '</td>' +
+                '<td class="' + statusClass + '">' + escapeHtml(statusText) + '</td>' +
+                '<td>' + escapeHtml(r.supportLevel || "-") + '</td>' +
+                '</tr>';
+    }
+
+    tbody.innerHTML = html;
+}
+
+/**
+ * Get the value of a column for sorting purposes.
+ */
+function getColumnValue(result, col) {
+    switch (col) {
+        case 0: return result.serviceTag || "";
+        case 1: return result.model || "";
+        case 2: return result.shipDate || "";
+        case 3: return result.warrantyStart || "";
+        case 4: return result.warrantyEnd || "";
+        case 5: return result.status || "";
+        case 6: return result.supportLevel || "";
+        default: return "";
+    }
+}
+
+/**
+ * Sort results by clicking a column header.
+ */
+function sortByColumn(col) {
+    if (appState.sortColumn === col) {
+        appState.sortAscending = !appState.sortAscending;
+    } else {
+        appState.sortColumn = col;
+        appState.sortAscending = true;
+    }
+
+    // Update header sort indicators
+    var headers = document.getElementById("resultsHead").getElementsByTagName("th");
+    for (var i = 0; i < headers.length; i++) {
+        headers[i].className = "";
+        var arrow = headers[i].getElementsByClassName("sort-arrow")[0];
+        if (arrow) {
+            arrow.innerHTML = "▴▾";
+        }
+    }
+    if (headers[col]) {
+        headers[col].className = "sorted";
+        var arrow = headers[col].getElementsByClassName("sort-arrow")[0];
+        if (arrow) {
+            arrow.innerHTML = appState.sortAscending ? "▴" : "▾";
+        }
+    }
+
+    updateResultsTable();
+}
+
+/**
+ * Toggle row selection.
+ */
+function toggleRowSelect(tag, evt) {
+    if (evt && evt.ctrlKey) {
+        // Multi-select with Ctrl
+        var idx = appState.selectedRows.indexOf(tag);
+        if (idx >= 0) {
+            appState.selectedRows.splice(idx, 1);
+        } else {
+            appState.selectedRows.push(tag);
+        }
+    } else {
+        // Single select
+        if (appState.selectedRows.length === 1 && appState.selectedRows[0] === tag) {
+            appState.selectedRows = [];
+        } else {
+            appState.selectedRows = [tag];
+        }
+    }
+    updateResultsTable();
+}
+
+// ============================================================
+// CONTEXT MENU
+// ============================================================
+
+/**
+ * Show a right-click context menu for a table row.
+ */
+function showContextMenu(evt, tag) {
+    evt.preventDefault();
+
+    // Select the row if not already selected
+    if (appState.selectedRows.indexOf(tag) < 0) {
+        appState.selectedRows = [tag];
+        updateResultsTable();
+    }
+
+    var menu = document.getElementById("contextMenu");
+    menu.style.display = "block";
+    menu.style.left = evt.clientX + "px";
+    menu.style.top = evt.clientY + "px";
+
+    // Store the tag for context menu actions
+    menu.setAttribute("data-tag", tag);
+
+    return false;
+}
+
+/**
+ * Hide the context menu.
+ */
+function hideContextMenu() {
+    document.getElementById("contextMenu").style.display = "none";
+}
+
+/**
+ * Copy selected rows to clipboard.
+ */
+function copySelectedRows() {
+    hideContextMenu();
+
+    var lines = ["ServiceTag\tModel\tShipDate\tWarrantyStart\tWarrantyEnd\tStatus\tSupportLevel"];
+
+    for (var i = 0; i < appState.results.length; i++) {
+        var r = appState.results[i];
+        if (appState.selectedRows.indexOf(r.serviceTag) >= 0) {
+            lines.push(r.serviceTag + "\t" + r.model + "\t" + r.shipDate + "\t" +
+                       r.warrantyStart + "\t" + r.warrantyEnd + "\t" + r.status + "\t" + r.supportLevel);
+        }
+    }
+
+    copyToClipboard(lines.join("\r\n"));
+    showToast("Copied " + appState.selectedRows.length + " row(s) to clipboard.", "success");
+}
+
+/**
+ * Re-lookup a specific service tag from the context menu.
+ */
+function reLookupTag() {
+    hideContextMenu();
+    var menu = document.getElementById("contextMenu");
+    var tag = menu.getAttribute("data-tag");
+    if (!tag) return;
+
+    showToast("Re-looking up " + tag + "...", "info");
+    lookupWarranty(tag, function(err, result) {
+        if (result) {
+            addOrUpdateResult(result);
+            updateResultsTable();
+            showToast("Updated " + tag, "success");
+        } else {
+            showToast("Lookup failed: " + (err || "Unknown error"), "error");
+        }
+    });
+}
+
+/**
+ * Remove selected rows from results.
+ */
+function removeSelectedRows() {
+    hideContextMenu();
+
+    var newResults = [];
+    for (var i = 0; i < appState.results.length; i++) {
+        if (appState.selectedRows.indexOf(appState.results[i].serviceTag) < 0) {
+            newResults.push(appState.results[i]);
+        }
+    }
+    appState.results = newResults;
+    appState.selectedRows = [];
+    updateResultsTable();
+    showToast("Selected rows removed.", "info");
+}
+
+/**
+ * Copy text to clipboard using an ActiveX helper.
+ */
+function copyToClipboard(text) {
+    try {
+        window.clipboardData.setData("Text", text);
+    } catch(e) {
+        showToast("Could not copy to clipboard.", "error");
+    }
+}
+
+// ============================================================
+// CSV EXPORT
+// ============================================================
+
+/**
+ * Export results to a CSV file.
+ * @param {boolean} excelFormat - If true, add BOM for Excel compatibility
+ */
+function exportCSV(excelFormat) {
+    if (appState.results.length === 0) {
+        showToast("No results to export.", "warning");
+        return;
+    }
+
+    try {
+        var dialog = new ActiveXObject("MSComDlg.CommonDialog");
+        dialog.Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*";
+        dialog.FilterIndex = 1;
+        dialog.MaxFileSize = 32767;
+        dialog.FileName = "DellWarrantyResults.csv";
+        dialog.ShowSave();
+
+        var filePath = dialog.FileName;
+        if (!filePath) return;
+
+        writeCSVFile(filePath, excelFormat);
+    } catch(e) {
+        // Fallback: save to desktop
+        exportCSVFallback(excelFormat);
+    }
+}
+
+/**
+ * Fallback export - saves to a default location.
+ */
+function exportCSVFallback(excelFormat) {
+    try {
+        var shell = new ActiveXObject("WScript.Shell");
+        var desktop = shell.SpecialFolders("Desktop");
+        var timestamp = getTimestamp();
+        var filePath = desktop + "\\DellWarrantyResults_" + timestamp + ".csv";
+
+        writeCSVFile(filePath, excelFormat);
+    } catch(e) {
+        showToast("Export failed: " + e.message, "error");
+    }
+}
+
+/**
+ * Write results data to a CSV file.
+ */
+function writeCSVFile(filePath, excelFormat) {
+    try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var f = fso.CreateTextFile(filePath, true, excelFormat);
+
+        // Write BOM for Excel if needed
+        if (excelFormat) {
+            // Unicode BOM is handled by CreateTextFile with unicode=true
+        }
+
+        // Header
+        f.WriteLine("Service Tag,Model,Ship Date,Warranty Start,Warranty End,Status,Support Level,Error");
+
+        // Data rows
+        for (var i = 0; i < appState.results.length; i++) {
+            var r = appState.results[i];
+            var line = csvEscape(r.serviceTag) + "," +
+                       csvEscape(r.model) + "," +
+                       csvEscape(r.shipDate) + "," +
+                       csvEscape(r.warrantyStart) + "," +
+                       csvEscape(r.warrantyEnd) + "," +
+                       csvEscape(r.status) + "," +
+                       csvEscape(r.supportLevel) + "," +
+                       csvEscape(r.error);
+            f.WriteLine(line);
+        }
+
+        f.Close();
+        showToast("Exported " + appState.results.length + " result(s) to " + filePath, "success");
+
+    } catch(e) {
+        showToast("Export error: " + e.message, "error");
+    }
+}
+
+/**
+ * Escape a value for CSV output.
+ */
+function csvEscape(val) {
+    if (!val) return '""';
+    val = String(val);
+    if (val.indexOf(",") >= 0 || val.indexOf('"') >= 0 || val.indexOf("\n") >= 0) {
+        return '"' + val.replace(/"/g, '""') + '"';
+    }
+    return '"' + val + '"';
+}
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+
+/**
+ * Parse a JSON string (HTA-compatible).
+ */
+function parseJSON(str) {
+    try {
+        // Try native JSON first (IE11)
+        if (typeof JSON !== "undefined" && JSON.parse) {
+            return JSON.parse(str);
+        }
+    } catch(e) {}
+
+    // Fallback eval (only for trusted API responses)
+    return eval("(" + str + ")");
+}
+
+/**
+ * Format a date string from ISO format.
+ */
+function formatDate(dateStr) {
+    if (!dateStr) return "";
+    try {
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return formatDateObj(d);
+    } catch(e) {
+        return dateStr;
+    }
+}
+
+/**
+ * Format a Date object to YYYY-MM-DD.
+ */
+function formatDateObj(d) {
+    var year = d.getFullYear();
+    var month = ("0" + (d.getMonth() + 1)).slice(-2);
+    var day = ("0" + d.getDate()).slice(-2);
+    return year + "-" + month + "-" + day;
+}
+
+/**
+ * Get a timestamp string for file naming.
+ */
+function getTimestamp() {
+    var d = new Date();
+    return d.getFullYear() + "" +
+           ("0" + (d.getMonth()+1)).slice(-2) +
+           ("0" + d.getDate()).slice(-2) + "_" +
+           ("0" + d.getHours()).slice(-2) +
+           ("0" + d.getMinutes()).slice(-2);
+}
+
+/**
+ * Escape HTML entities.
+ */
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+/**
+ * Filter results on search input change.
+ */
+function onSearchInput() {
+    updateResultsTable();
+}
+
+// ============================================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================================
+
+/**
+ * Show a toast notification.
+ * @param {string} message - The message text
+ * @param {string} type - "info", "success", "error", or "warning"
+ */
+function showToast(message, type) {
+    var container = document.getElementById("toastContainer");
+    var toast = document.createElement("div");
+    toast.className = "toast toast-" + (type || "info");
+
+    var icon = "";
+    switch (type) {
+        case "success": icon = "✓ "; break;
+        case "error": icon = "✗ "; break;
+        case "warning": icon = "⚠ "; break;
+        default: icon = "ℹ "; break;
+    }
+
+    toast.innerHTML = icon + escapeHtml(message);
+    container.appendChild(toast);
+
+    // Auto-remove after 4 seconds
+    setTimeout(function() {
+        try {
+            container.removeChild(toast);
+        } catch(e) {}
+    }, 4000);
+}
+
+// ============================================================
+// KEYBOARD HANDLER
+// ============================================================
+document.onkeydown = function(e) {
+    e = e || window.event;
+    var key = e.keyCode;
+
+    // Enter key in single tag input -> lookup
+    if (key === 13) {
+        var active = document.activeElement;
+        if (active && active.id === "singleTag") {
+            singleLookup();
+            return false;
+        }
+    }
+
+    // Escape -> hide context menu
+    if (key === 27) {
+        hideContextMenu();
+    }
+
+    // Ctrl+A -> select all results
+    if (e.ctrlKey && key === 65) {
+        var active = document.activeElement;
+        if (!active || (active.tagName !== "INPUT" && active.tagName !== "TEXTAREA")) {
+            e.preventDefault();
+            appState.selectedRows = [];
+            for (var i = 0; i < appState.results.length; i++) {
+                appState.selectedRows.push(appState.results[i].serviceTag);
+            }
+            updateResultsTable();
+            return false;
+        }
+    }
+};
+
+// Click outside context menu to close
+document.onclick = function() {
+    hideContextMenu();
+};
+</script>
+</head>
+<body onload="initApp()">
+
+<!-- ============================================================
+     TOAST NOTIFICATION CONTAINER
+     ============================================================ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ============================================================
+     RIGHT-CLICK CONTEXT MENU
+     ============================================================ -->
+<div id="contextMenu" class="context-menu">
+    <div class="context-menu-item" onclick="copySelectedRows()">&#128203; Copy Selected Rows</div>
+    <div class="context-menu-item" onclick="reLookupTag()">&#128260; Re-Lookup Tag</div>
+    <div class="context-menu-sep"></div>
+    <div class="context-menu-item" onclick="removeSelectedRows()">&#10006; Remove Selected</div>
+</div>
+
+<!-- ============================================================
+     HIDDEN FILE INPUT FOR IMPORT FALLBACK
+     ============================================================ -->
+<input type="file" id="fileInput" accept=".csv,.txt" style="display:none" onchange="handleFileSelect()" />
+
+<!-- ============================================================
+     MAIN APP CONTAINER
+     ============================================================ -->
+<div class="app-container">
+
+    <!-- ==================== HEADER ==================== -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-icon">D</div>
+            <div>
+                <div class="header-title">Dell Warranty Lookup Tool</div>
+                <div class="header-subtitle">IT Asset Warranty Management</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button id="themeBtn" class="theme-toggle" onclick="toggleTheme()">&#9790; Dark Mode</button>
+        </div>
+    </div>
+
+    <!-- ==================== SCROLLABLE MAIN AREA ==================== -->
+    <div class="main-content">
+
+        <!-- ==================== AUTHENTICATION CARD ==================== -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">&#128274;</span> Dell API Authentication
+                </div>
+                <span id="authBadge" class="card-badge badge-danger">&#10007; Not Authenticated</span>
+            </div>
+            <div class="auth-row">
+                <div class="form-group">
+                    <label class="form-label">Client ID</label>
+                    <input type="text" id="clientId" class="form-input" placeholder="Enter Dell API Client ID" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Client Secret</label>
+                    <input type="password" id="clientSecret" class="form-input" placeholder="Enter Dell API Client Secret" />
+                </div>
+                <div class="btn-group" style="padding-bottom:1px;">
+                    <button class="btn btn-primary" onclick="testAuth()">&#128272; Authenticate</button>
+                    <button class="btn btn-secondary" onclick="saveCredentials()">&#128190; Save</button>
+                    <button class="btn btn-secondary" onclick="clearSavedCredentials()">&#128465; Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SINGLE LOOKUP CARD ==================== -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">&#128269;</span> Single Service Tag Lookup
+                </div>
+            </div>
+            <div class="lookup-row">
+                <div class="form-group">
+                    <label class="form-label">Service Tag</label>
+                    <input type="text" id="singleTag" class="form-input" placeholder="e.g. DXL9KS3" maxlength="15" />
+                </div>
+                <button id="lookupBtn" class="btn btn-primary" onclick="singleLookup()" style="margin-bottom:1px;">&#128269; Lookup</button>
+            </div>
+        </div>
+
+        <!-- ==================== BULK IMPORT CARD ==================== -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">&#128194;</span> Bulk Import &amp; Batch Processing
+                </div>
+            </div>
+            <div class="import-area">
+                <button id="importBtn" class="btn btn-secondary" onclick="importFile()">&#128206; Import CSV / TXT</button>
+                <button id="startBatchBtn" class="btn btn-success" onclick="startBatch()" disabled>&#9654; Start Processing</button>
+                <button id="cancelBatchBtn" class="btn btn-danger" onclick="cancelBatch()" disabled>&#9724; Cancel</button>
+            </div>
+            <div id="tagsPreview" class="tags-preview"></div>
+
+            <!-- Progress Section -->
+            <div id="progressSection" class="progress-section">
+                <div class="progress-bar-container">
+                    <div id="progressFill" class="progress-bar-fill"></div>
+                </div>
+                <div class="progress-stats">
+                    <div class="stat"><span class="stat-dot dot-total"></span> Total: <strong id="statTotal">0</strong></div>
+                    <div class="stat"><span class="stat-dot dot-done"></span> Completed: <strong id="statCompleted">0</strong></div>
+                    <div class="stat"><span class="stat-dot dot-fail"></span> Failed: <strong id="statFailed">0</strong></div>
+                    <div class="stat"><span class="stat-dot dot-left"></span> Remaining: <strong id="statRemaining">0</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RESULTS CARD ==================== -->
+        <div class="card" id="resultsCard">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="icon">&#128202;</span> Warranty Results
+                </div>
+            </div>
+
+            <!-- Search & Toolbar -->
+            <div class="table-toolbar">
+                <div class="search-box">
+                    <span class="search-icon">&#128269;</span>
+                    <input type="text" id="searchInput" placeholder="Search results..." oninput="onSearchInput()" />
+                </div>
+                <span id="resultCount" class="result-count">0 result(s)</span>
+            </div>
+
+            <!-- Results Table -->
+            <div class="table-wrapper">
+                <table>
+                    <thead id="resultsHead">
+                        <tr>
+                            <th onclick="sortByColumn(0)">Service Tag <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(1)">Model <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(2)">Ship Date <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(3)">Warranty Start <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(4)">Warranty End <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(5)">Status <span class="sort-arrow">&#9652;&#9662;</span></th>
+                            <th onclick="sortByColumn(6)">Support Level <span class="sort-arrow">&#9652;&#9662;</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="empty-icon">&#128196;</div>
+                                <p>No results to display</p>
+                                <div class="sub">Enter a service tag or import a file to get started</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <div class="footer">
+        <div class="footer-left">
+            <button class="btn btn-primary btn-sm" onclick="exportCSV(false)">&#128190; Export CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV(true)">&#128202; Export (Excel)</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearResults()">&#128465; Clear Results</button>
+        </div>
+        <div class="footer-right">
+            Dell Warranty Lookup Tool v2.0 &mdash; For internal IT use only
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

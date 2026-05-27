@@ -20,6 +20,7 @@ Setup Instructions
       o	Export the results to CSV or XLSX format 
 
 Notes
+
 •	An active internet connection is required.
 
 •	Dell API access may require your organization to be enrolled in TechDirect.

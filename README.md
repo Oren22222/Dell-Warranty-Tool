@@ -25,7 +25,7 @@ Notes
 
 •	Dell API access may require your organization to be enrolled in TechDirect.
 
-•	Large imports may take several minutes depending on Dell API rate limits.
+•	Large imports may take several minutes depending on Dell API rate limits. 
 
 
 <img width="1255" height="835" alt="image" src="https://github.com/user-attachments/assets/0a1cbda3-e574-466e-b5b8-cc0d27cb5b5a" />
